@@ -80,18 +80,19 @@ class MLP(BaseModel):
 
 
     def build_model(self):
-        
         #define dimensions
         in_dim = self.input_dim
         hidden_dim = 100
         out_dim = 1
+        feature_2d = 2
         
         #add sequentiallayers
         #input linear layer -> ReLU activiation -> ouput linear layer
         return nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, out_dim),
+            nn.Linear(hidden_dim, feature_2d),
+            nn.Linear(feature_2d, out_dim),
         )
 
 #sample input function and reset function:
@@ -123,3 +124,4 @@ class MLP(BaseModel):
     #user_df.drop(user_df.index, inplace=True)
 
     #return user_df
+
