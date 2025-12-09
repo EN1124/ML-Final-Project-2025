@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loan Predictor-example usage</title>
+    <style>
+        body { font-family: Arial; max-width: 700px; margin: 50px auto; padding: 20px; }
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; font-size: 16px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 20px; border-radius: 10px; font-size: 20px; text-align: center; }
+        .safe { background: #d4edda; color: #155724; }
+        .risky { background: #f8d7da; color: #721c24; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        label { font-weight: bold; margin-bottom: 5px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🏦 Loan Default Predictor Sample page (Non-functional)</h1>
+        <form id="predictionForm">
+            <label for="age">Age:</label>
+            <input type="number" id="age" required>
+            
+            <label for="income">Income:</label>
+            <input type="number" id="income" required>
+            
+            <label for="loanAmount">Loan Amount:</label>
+            <input type="number" id="loanAmount" required>
+            
+            <label for="creditScore">Credit Score:</label>
+            <input type="number" id="creditScore" required>
+            
+            <label for="monthsEmployed">Months Employed:</label>
+            <input type="number" id="monthsEmployed" required>
+            
+            <label for="education">Education:</label>
+            <select id="education" required>
+                <option value="High School">High School</option>
+                <option value="Bachelor">Bachelor</option>
+                <option value="Master">Master</option>
+                <option value="PhD">PhD</option>
+            </select>
+            
+            <label for="employmentType">Employment Type:</label>
+            <select id="employmentType" required>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Self-employed">Self-employed</option>
+            </select>
+            
+            <label for="maritalStatus">Marital Status:</label>
+            <select id="maritalStatus" required>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Divorced">Divorced</option>
+            </select>
+            
+            <label for="loanPurpose">Loan Purpose:</label>
+            <select id="loanPurpose" required>
+                <option value="Home">Home</option>
+                <option value="Car">Car</option>
+                <option value="Education">Education</option>
+                <option value="Business">Business</option>
+            </select>
+            
+            <label for="hasMortgage">Has Mortgage:</label>
+            <select id="hasMortgage" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
+            
+            <label for="hasDependents">Has Dependents:</label>
+            <select id="hasDependents" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
+            
+            <label for="hasCoSigner">Has Co-Signer:</label>
+            <select id="hasCoSigner" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+            </select>
+        <button type="button"onclick="display_prediction()">PREDICT DEFAULT RISK</button> 
+        <div class="probability">Probability of Default: <span id="probValue"></span></div>
+        <div class="risk-score">Risk Score: <span id="riskValue"></span></div>
+        <div class="errormessage">Model not integrated due to pyscript errors, example output shown
+        </div>
+    
+
+   <!-- PyScript Setup -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.7.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.7.1/core.js"></script>
+    
+    <py-config>
+        packages = ["pandas", "torch", "numpy"]
+        [[runtimes]]
+        name = "python"
+        src = "ModelsFinal.py"
+    </py-config>
+
+    
+    
+     <!--1. Extract user input to variables in order-->
+     <script>
+        function extractUserInputs() {
+        const userInputs = [
+        parseFloat(document.getElementById('age').value),                    // [0] Age
+        parseFloat(document.getElementById('income').value),                 // [1] Income
+        parseFloat(document.getElementById('loan_amount').value),            // [2] LoanAmount
+        parseFloat(document.getElementById('credit_score').value),           // [3] CreditScore
+        parseFloat(document.getElementById('months_employed').value),        // [4] MonthsEmployed
+        parseFloat(document.getElementById('num_credit_lines').value),       // [5] NumCreditLines
+        parseFloat(document.getElementById('interest_rate').value),          // [6] InterestRate
+        parseFloat(document.getElementById('loan_term').value),              // [7] LoanTerm
+        parseFloat(document.getElementById('dti').value),                    // [8] DTIRatio
+        document.getElementById('education').value,                          // [9] Education
+        document.getElementById('employment').value,                         // [10] EmploymentType
+        document.getElementById('marital_status').value,                     // [11] MaritalStatus
+        document.getElementById('has_mortgage').checked ? 1 : 0,             // [12] HasMortgage
+        document.getElementById('has_dependents').checked ? 1 : 0,           // [13] HasDependents
+        document.getElementById('loan_purpose').value,                       // [14] LoanPurpose
+        document.getElementById('has_co_signer').checked ? 1 : 0             // [15] HasCoSigner
+        ];
+    
+        return userInputs;
+        }   
+    
+    </script>
+     
+    <py-script>
+                import pandas as pd
+                import torch
+                import pytorch_lightning as L
+                from torch.utils.data import DataLoader, TensorDataset
+                import numpy as np
+                from ModelsFinal import MLP
+                from pyscript import display, Element
+
+                
+                <!--Load model and pretrained weights and biases-->
+                model = MLP(24)  
+                model.load_state_dict(torch.load('model_MLPtrained.pth'))
+                model.eval() 
+            
+            
+            
+                <!--2. create dataframe and one hot encoded variables. convert to input tensor-->
+                def predict_loan_risk(inputs):
+                    df_user = pd.DataFrame({
+                        'Age': [inputs[0]], 'Income': [inputs[1]], 'LoanAmount': [inputs[2]],
+                        'CreditScore': [inputs[3]], 'MonthsEmployed': [inputs[4]], 
+                        'NumCreditLines': [inputs[5]], 'InterestRate': [inputs[6]],
+                        'LoanTerm': [inputs[7]], 'DTIRatio': [inputs[8]],
+                        'Education': [inputs[9]], 'EmploymentType': [inputs[10]],
+                        'MaritalStatus': [inputs[11]], 'HasMortgage': [inputs[12]],
+                        'HasDependents': [inputs[13]], 'LoanPurpose': [inputs[14]],
+                        'HasCoSigner': [inputs[15]]
+                    })
+
+                    df_encoded = pd.get_dummies(df_user, columns=['Education','EmploymentType','MaritalStatus','LoanPurpose','HasMortgage',
+                        'HasDependents','HasCoSigner'],drop_first=True, dtype=float)
+
+                        x_inputs = torch.tensor(df_encoded.to_numpy(),dtype=torch.float32)
+
+                        <!--3. Create model,run,returning a singular output tensor-->
+                        model.load_state_dict(torch.load('model_MLPtrained.pth'))
+                        with torch.no_grad():
+                            output = float(model(x_inputs))
+                            return output
+                        to_js(output)
+        </py-script> 
+
+    <script>
+         
+                
+
+        <!-- Display high risk if probability is above 0.5 and low risk otherwise-->
+         //display for sample output
+           function display_prediction(){
+            output = 0.3
+            isHighRisk = output > 0.5;
+            const riskLevel = isHighRisk ? 'High Risk' : 'Low Risk';
+            const riskClass = isHighRisk ? 'high-risk' : 'low-risk';
+            
+            // Set text next to labels
+            document.getElementById('probValue').textContent = (output * 100).toFixed(1) + '%';
+            document.getElementById('riskValue').textContent = riskLevel;
+            
+        }
+        
+    </script>
+</body>
+</html>
