@@ -95,31 +95,31 @@ class MLP(BaseModel):
         )
 
 #sample input function and reset function:
-def Input_UserData(age,income,LoanAmount,education,employment,marital_status,loan_purpose,credit_score,months_employed,num_credit_lines,Interest_Rate,DTI,LoanTerm):
+#def Input_UserData(age,income,LoanAmount,education,employment,marital_status,loan_purpose,credit_score,months_employed,num_credit_lines,Interest_Rate,DTI,LoanTerm):
    
    #temp dictionary
-   user_data = {
-       'age': [age],
-       'income': [income],
-       'LoanAmount': [LoanAmount],
-        'Education': [education],
-        'EmploymentType': [employment],
-        'MaritalStatus': [marital_status],
-        'LoanPurpose': [loan_purpose],
-        'CreditScore': [credit_score],
-        'MonthsEmployed': [months_employed],
-        'NumCreditLines': [num_credit_lines],
-        'Interest_Rate': [Interest_Rate],
-        'DTI': [DTI],
-        'LoanTerm': [LoanTerm]
-    }
-    
+   #user_data = {
+       #'age': [age],
+       #'income': [income],
+       #'LoanAmount': [LoanAmount],
+        #'Education': [education],
+        #'EmploymentType': [employment],
+        #'MaritalStatus': [marital_status],
+        #'LoanPurpose': [loan_purpose],
+        #'CreditScore': [credit_score],
+        #'MonthsEmployed': [months_employed],
+        #'NumCreditLines': [num_credit_lines],
+        #'Interest_Rate': [Interest_Rate],
+        #'DTI': [DTI],
+        #'LoanTerm': [LoanTerm]
+    #}
     # Create single-row DataFrame
-    user_df = pd.DataFrame(user_data)
+    #user_df = pd.DataFrame(user_data)
     
-    return user_df
+    #return user_df
 
 
-def Clear_UserData(user_df):
-    user_df.drop(user_df.index, inplace=True)
-    return user_df
+#def Clear_UserData(user_df):
+    #user_df.drop(user_df.index, inplace=True)
+
+    #return user_df
